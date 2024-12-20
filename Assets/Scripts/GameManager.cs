@@ -2,16 +2,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
+    public static Action<int, int> OnTilesMatch = null; //event to invoke in case two tiles gets matched
+    public static Action<int> OnTurnFinished = null; //this is to invoke when player finishes the turn
+    public static Action OnLeveFinished = null; //this is to invoke when pairs found becomes equal to the required number of pairs
     public static GameManager Instance;
     public GridLayoutGroup cardGrid;
     public GameObject cardPrefab;
 
     [Tooltip("Ensure that grid size is not an odd number")]
     [SerializeField] private int gridsize = 4;
+    private int moves = 0;
+    private int pairsFound = 0;
     private int totalPairs;
     private List<CardController> flippedCards = new List<CardController>();
 
@@ -35,6 +41,10 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("Grid size is not even. Please ensure you are not putting an odd number in grid size in Gamemanager", gameObject);
             return;
         }
+        moves = 0;
+        pairsFound = 0;
+        OnTurnFinished?.Invoke(moves);
+        OnTilesMatch?.Invoke(pairsFound, totalPairs);
         totalPairs = (rows * cols) / 2;
 
         // Generate card faces and shuffle them
@@ -59,9 +69,16 @@ public class GameManager : MonoBehaviour
         flippedCards.Add(card);
         if (flippedCards.Count == 2)
         {
+            moves++;
+            OnTurnFinished?.Invoke(moves);
+
             if (flippedCards[0].cardFace == flippedCards[1].cardFace)
             {
                 Debug.Log("found a matching card pairs");
+                pairsFound++;
+                OnTilesMatch?.Invoke(pairsFound, totalPairs);
+                if (pairsFound == totalPairs)
+                    StartCoroutine(AnnounceLevelWin());
                 foreach (var flippedcard in flippedCards)
                     flippedcard.Disappear();
             }
@@ -111,11 +128,17 @@ public class GameManager : MonoBehaviour
         shuffled.AddRange(cardFaces); // Duplicate for pairs
         for (int i = 0; i < shuffled.Count; i++)
         {
-            int randIndex = Random.Range(0, shuffled.Count);
+            int randIndex = UnityEngine.Random.Range(0, shuffled.Count);
             Sprite temp = shuffled[i];
             shuffled[i] = shuffled[randIndex];
             shuffled[randIndex] = temp;
         }
         return shuffled;
+    }
+
+    private IEnumerator AnnounceLevelWin()
+    {
+        yield return new WaitForSeconds(1f);
+        OnLeveFinished?.Invoke();
     }
 }
