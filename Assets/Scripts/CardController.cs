@@ -104,6 +104,36 @@ public class CardController : MonoBehaviour
         isAnimating = false;
     }
 
+    public void Disappear()
+    {
+        StartCoroutine(FadeOutAndDisable());
+    }
+
+    private IEnumerator FadeOutAndDisable()
+    {
+        float cardScale = 1.2f;
+        transform.localScale = Vector3.one * cardScale;
+        yield return new WaitForSeconds(0.25f);
+        while (cardScale > 1)
+        {
+            cardScale = cardScale - Time.deltaTime;
+            transform.localScale = Vector3.one * cardScale;
+            yield return null;
+        }
+        yield return new WaitForSeconds(0.25f);
+        CanvasGroup canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        float fadeDuration = 0.5f;
+
+        for (float t = 0; t < fadeDuration; t += Time.deltaTime)
+        {
+            canvasGroup.alpha = 1 - (t / fadeDuration);
+            yield return null;
+        }
+
+        canvasGroup.alpha = 0;
+        gameObject.SetActive(false);
+    }
+
     public void ResetCardState()
     {
         // Ensure only the back image is visible initially

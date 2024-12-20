@@ -63,7 +63,7 @@ public class GameManager : MonoBehaviour
             {
                 Debug.Log("found a matching card pairs");
                 foreach (var flippedcard in flippedCards)
-                    Destroy(flippedcard.gameObject, 1);
+                    flippedcard.Disappear();
             }
             else
             {
