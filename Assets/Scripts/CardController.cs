@@ -43,6 +43,7 @@ public class CardController : MonoBehaviour
         isAnimating = true;
         float rotation = 0f;
 
+        // Step 1: Rotate halfway (90 degrees)
         while (rotation < 90f)
         {
             rotation += Time.deltaTime * flipSpeed * 180f;
@@ -50,10 +51,12 @@ public class CardController : MonoBehaviour
             yield return null;
         }
 
+        // Step 2: Toggle Card's front image visibility to enable and back image to disabled at 90 degrees
         isFlipped = true;
         cardFrontImage.enabled = true;
         cardBackImage.enabled = false;
 
+        // Step 3: Rotate card to full (180 degrees)
         while (rotation < 180f)
         {
             rotation += Time.deltaTime * flipSpeed * 180f;
@@ -61,7 +64,7 @@ public class CardController : MonoBehaviour
             yield return null;
         }
 
-        transform.rotation = Quaternion.identity; // Reset rotation
+        transform.rotation = Quaternion.identity; // Reset rotation of the card
         isAnimating = false;
     }
 
@@ -76,6 +79,7 @@ public class CardController : MonoBehaviour
         isAnimating = true;
         float rotation = 180f;
 
+        // Step 1: Rotate halfway back (90 degrees)
         while (rotation > 90f)
         {
             rotation -= Time.deltaTime * flipSpeed * 180f;
@@ -83,10 +87,12 @@ public class CardController : MonoBehaviour
             yield return null;
         }
 
+        // Step 2: Swap visibility of the card again to card's back image
         isFlipped = false;
         cardFrontImage.enabled = false;
         cardBackImage.enabled = true;
 
+        // Step 3: Rotate back to initial position (0 degrees)
         while (rotation > 0f)
         {
             rotation -= Time.deltaTime * flipSpeed * 180f;
@@ -94,7 +100,7 @@ public class CardController : MonoBehaviour
             yield return null;
         }
 
-        transform.rotation = Quaternion.identity; // Reset rotation
+        transform.rotation = Quaternion.identity; // Reset rotation of the card once again 
         isAnimating = false;
     }
 
