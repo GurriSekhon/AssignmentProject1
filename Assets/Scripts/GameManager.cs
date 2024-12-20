@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
@@ -10,8 +11,10 @@ public class GameManager : MonoBehaviour
     public GameObject cardPrefab;
 
     [Tooltip("Ensure that grid size is not an odd number")]
-    [SerializeField] private int gridsize;
+    [SerializeField] private int gridsize = 4;
     private int totalPairs;
+    private List<CardController> flippedCards = new List<CardController>();
+
     void Awake()
     {
         if (Instance == null)
@@ -51,7 +54,26 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    
+    public void OnCardFlipped(CardController card)
+    {
+        flippedCards.Add(card);
+        if (flippedCards.Count == 2)
+        {
+            if (flippedCards[0].cardFace == flippedCards[1].cardFace)
+            {
+                Debug.Log("found a matching card pairs");
+                foreach (var flippedcard in flippedCards)
+                    Destroy(flippedcard.gameObject, 1);
+            }
+            else
+            {
+                foreach (var flippedcard in flippedCards)
+                    flippedcard.FlipBack();
+            }
+            flippedCards.Clear();
+        }
+    }
+
     private List<Sprite> GenerateCardFaces(int pairCount)
     {
         // Load all sprites from the spritesheet in the Resources folder
@@ -64,7 +86,6 @@ public class GameManager : MonoBehaviour
             return new List<Sprite>();
         }
 
-        
         List<Sprite> selectedSprites = new List<Sprite>();
         for (int i = 0; i < pairCount; i++)
         {
@@ -80,7 +101,6 @@ public class GameManager : MonoBehaviour
                 Debug.LogError("Sprite with name '" + spriteName + "' not found in the spritesheet!");
             }
         }
-
         return selectedSprites;
     }
 

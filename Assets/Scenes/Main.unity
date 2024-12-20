@@ -482,7 +482,7 @@ GameObject:
   - component: {fileID: 653680918}
   - component: {fileID: 653680917}
   m_Layer: 5
-  m_Name: Moves Count Label
+  m_Name: Turns Count Label
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -999,7 +999,7 @@ GameObject:
   - component: {fileID: 1714322329}
   - component: {fileID: 1714322328}
   m_Layer: 5
-  m_Name: Match Count
+  m_Name: Match Count Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1134,7 +1134,7 @@ GameObject:
   - component: {fileID: 1869898031}
   - component: {fileID: 1869898030}
   m_Layer: 5
-  m_Name: Moves Text
+  m_Name: Turns Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1270,7 +1270,7 @@ GameObject:
   - component: {fileID: 2056476454}
   - component: {fileID: 2056476453}
   m_Layer: 5
-  m_Name: Moves Count
+  m_Name: Turns Count Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

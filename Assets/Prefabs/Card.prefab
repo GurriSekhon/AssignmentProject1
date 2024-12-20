@@ -217,6 +217,8 @@ MonoBehaviour:
   cardBackImage: {fileID: 7780516416818312290}
   cardMiddleImage: {fileID: 4093657297980335864}
   flipSpeed: 5
+  cardRevealbutton: {fileID: 6540853034861510087}
+  cardFace: {fileID: 0}
 --- !u!1 &8183910494362589150
 GameObject:
   m_ObjectHideFlags: 0
@@ -380,7 +382,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300022, guid: dffef66376be4fa480fb02b19edbe903, type: 3}
+  m_Sprite: {fileID: 1381527244, guid: dffef66376be4fa480fb02b19edbe903, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
