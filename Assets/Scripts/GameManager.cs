@@ -7,6 +7,7 @@ using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
+    public static Action<int, int> OnGameStart = null; //event to invoke when game starts
     public static Action<int, int> OnTilesMatch = null; //event to invoke in case two tiles gets matched
     public static Action<int> OnTurnFinished = null; //this is to invoke when player finishes the turn
     public static Action<float> OnTilesMisMatch = null; //event is invoked in case two tiles doesn't match
@@ -54,9 +55,8 @@ public class GameManager : MonoBehaviour
 
         moves = 0;
         pairsFound = 0;
-        OnTurnFinished?.Invoke(moves);
-        OnTilesMatch?.Invoke(pairsFound, totalPairs);
         totalPairs = (rows * cols) / 2;
+        OnGameStart?.Invoke(pairsFound, totalPairs);
 
         // Generate card faces and shuffle them
         List<Sprite> cardFaces = GenerateCardFaces(totalPairs);
