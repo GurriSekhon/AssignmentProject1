@@ -9,7 +9,9 @@ public class GameManager : MonoBehaviour
 {
     public static Action<int, int> OnTilesMatch = null; //event to invoke in case two tiles gets matched
     public static Action<int> OnTurnFinished = null; //this is to invoke when player finishes the turn
+    public static Action<float> OnTilesMisMatch = null; //event is invoked in case two tiles doesn't match
     public static Action OnLeveFinished = null; //this is to invoke when pairs found becomes equal to the required number of pairs
+    public static Action OnCardFlip = null; //event gets invoked at each tile flip
     public static GameManager Instance;
     public GridLayoutGroup cardGrid;
     public GameObject cardPrefab;
@@ -67,6 +69,8 @@ public class GameManager : MonoBehaviour
     public void OnCardFlipped(CardController card)
     {
         flippedCards.Add(card);
+        OnCardFlip?.Invoke();
+
         if (flippedCards.Count == 2)
         {
             moves++;
@@ -85,7 +89,12 @@ public class GameManager : MonoBehaviour
             else
             {
                 foreach (var flippedcard in flippedCards)
+                {
                     flippedcard.FlipBack();
+                    flippedcard.PlayMismatchAnimation();
+                }
+            
+                OnTilesMisMatch?.Invoke(0.5f);
             }
             flippedCards.Clear();
         }

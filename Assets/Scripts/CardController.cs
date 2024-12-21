@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,6 +19,7 @@ public class CardController : MonoBehaviour
     {
         cardRevealbutton.onClick.AddListener(OnCardClicked);
     }
+
     void Start()
     {
         // To Ensure card starts in the correct state (back of the card is visible, and front is hidden)
@@ -37,6 +39,7 @@ public class CardController : MonoBehaviour
         StartCoroutine(Flip());
         GameManager.Instance.OnCardFlipped(this);
     }
+
 
     private IEnumerator Flip()
     {
@@ -75,8 +78,8 @@ public class CardController : MonoBehaviour
 
     private IEnumerator FlipBackCoroutine()
     {
-        yield return new WaitForSeconds(1);
         isAnimating = true;
+        yield return new WaitForSeconds(1f);
         float rotation = 180f;
 
         // Step 1: Rotate halfway back (90 degrees)
@@ -102,6 +105,21 @@ public class CardController : MonoBehaviour
 
         transform.rotation = Quaternion.identity; // Reset rotation of the card once again 
         isAnimating = false;
+    }
+
+    public void PlayMismatchAnimation()
+    {
+        StartCoroutine(PlayTilesMismatchAnimation());
+    }
+    IEnumerator PlayTilesMismatchAnimation()
+    {
+        yield return new WaitForSeconds(0.5f);
+        Vector3 initialPosition = cardFrontImage.transform.localPosition;
+        cardFrontImage.transform.localRotation = Quaternion.Euler(0, 0, 5);
+        yield return new WaitForSeconds(0.1f);
+        cardFrontImage.transform.localRotation = Quaternion.Euler(0, 0, -5);
+        yield return new WaitForSeconds(0.1f);
+        cardFrontImage.transform.localRotation = Quaternion.identity;
     }
 
     public void Disappear()
