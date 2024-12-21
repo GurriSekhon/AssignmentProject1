@@ -4,9 +4,11 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
+    public static Action OnPressingNextButton;
     [SerializeField] private TextMeshProUGUI turnsCounterText;
     [SerializeField] private TextMeshProUGUI matchCountText;
     [SerializeField] private TextMeshProUGUI scoreText;
@@ -19,7 +21,7 @@ public class UIManager : MonoBehaviour
             Instance = this;
         else
             Destroy(this);
-        nextLevelButton.onClick.AddListener(ReloadScene);
+        nextLevelButton.onClick.AddListener(GoToNextLevel);
     }
 
     private void OnEnable()
@@ -94,6 +96,12 @@ public class UIManager : MonoBehaviour
             comboText.color = initialColor;
         }
         comboText.gameObject.SetActive(false);
+    }
+
+    private void GoToNextLevel()
+    {
+        OnPressingNextButton?.Invoke();
+        ReloadScene();
     }
 
     private void ReloadScene()

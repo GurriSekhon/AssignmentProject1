@@ -42,13 +42,30 @@ public class GameManager : MonoBehaviour
         layoutManager = cardContainer.GetComponent<ManualLayoutManager>();
     }
 
+    private void OnEnable()
+    {
+        UIManager.OnPressingNextButton += ResetGame;
+    }
+
+    private void OnDisable()
+    {
+        UIManager.OnPressingNextButton -= ResetGame;
+    }
+
     void Start()
     {
         // Check if there's a saved game in progress
         if (PlayerPrefs.HasKey("GameInProgress"))
         {
-            Debug.Log("Saved game found. Looking data..");
-            LoadGame();
+            if (PlayerPrefs.GetInt("GameInProgress", 1) == 1)
+            {
+                Debug.Log("Saved game found. Loading data..");
+                LoadGame();
+            }
+            else
+            {
+                SetupGame(rows, cols);
+            }
         }
         else
         {
@@ -68,7 +85,7 @@ public class GameManager : MonoBehaviour
         //If no seed is specified, pick a random one
         if (shuffleSeed == 0)
         {
-            shuffleSeed = UnityEngine.Random.Range(1, 999999);
+            RandomizeSeed();
             Debug.Log($"No seed specified; using random seed: {shuffleSeed}");
         }
 
@@ -209,6 +226,19 @@ public class GameManager : MonoBehaviour
         return shuffled;
     }
 
+    private void RandomizeSeed()
+    {
+        shuffleSeed = UnityEngine.Random.Range(1, 999999);
+        Debug.Log("Randomized seed: " + shuffleSeed);
+    }
+
+    private void ResetGame()
+    {
+        PlayerPrefs.DeleteAll();
+    }
+
+
+
     private IEnumerator AnnounceLevelWin()
     {
         yield return new WaitForSeconds(1f);
@@ -233,7 +263,7 @@ public class GameManager : MonoBehaviour
 
     public void LoadGame()
     {
-        
+
         // Retrieve basic data
         shuffleSeed = PlayerPrefs.GetInt("Seed", 0);
         rows = PlayerPrefs.GetInt("Rows", 4);
