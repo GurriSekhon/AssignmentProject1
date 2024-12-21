@@ -342,5 +342,7 @@ public class GameManager : MonoBehaviour
             }
         }
         Debug.Log("Removed matched cards from the layout based on saved data.");
+        if (pairsFound == totalPairs)
+            StartCoroutine(AnnounceLevelWin());
     }
 }
