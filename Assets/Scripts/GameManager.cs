@@ -7,7 +7,7 @@ using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
-    public static Action<int, int> OnGameStart = null; //event to invoke when game starts
+    public static Action<int, int, int> OnGameStart = null; //event to invoke when game starts
     public static Action<int, int> OnTilesMatch = null; //event to invoke in case two tiles gets matched
     public static Action<int> OnTurnFinished = null; //this is to invoke when player finishes the turn
     public static Action<float> OnTilesMisMatch = null; //event is invoked in case two tiles doesn't match
@@ -39,12 +39,21 @@ public class GameManager : MonoBehaviour
         else
             Destroy(this);
         layoutManager = cardContainer.GetComponent<ManualLayoutManager>();
-
     }
 
     void Start()
     {
-        SetupGame(rows, cols);
+        // Check if there's a saved game in progress
+        if (PlayerPrefs.HasKey("GameInProgress"))
+        {
+            Debug.Log("Saved game found. Looking data..");
+            LoadGame();
+        }
+        else
+        {
+            Debug.Log("No saved game found! Starting from scratch");
+            SetupGame(rows, cols);
+        }
     }
 
     public void SetupGame(int rows, int cols)
@@ -65,10 +74,8 @@ public class GameManager : MonoBehaviour
         // Set the random state for a deterministic shuffle
         UnityEngine.Random.InitState(shuffleSeed);
 
-        moves = 0;
-        pairsFound = 0;
         totalPairs = (rows * cols) / 2;
-        OnGameStart?.Invoke(pairsFound, totalPairs);
+        OnGameStart?.Invoke(pairsFound, totalPairs, moves);
 
         // Generate card faces and shuffle them
         List<Sprite> cardFaces = GenerateCardFaces(totalPairs);
@@ -100,7 +107,7 @@ public class GameManager : MonoBehaviour
         StartCoroutine(RevealAndHideCards(cardControllers));
     }
 
-   
+
 
     private IEnumerator RevealAndHideCards(List<CardController> cardControllers)
     {
@@ -118,7 +125,7 @@ public class GameManager : MonoBehaviour
         // Hide the cards again
         foreach (var card in cardControllers)
         {
-            card.FlipBack(); 
+            card.FlipBack();
         }
     }
 
@@ -149,7 +156,7 @@ public class GameManager : MonoBehaviour
                     flippedcard.FlipBack();
                     flippedcard.PlayMismatchAnimation();
                 }
-            
+
                 OnTilesMisMatch?.Invoke(0.5f);
             }
             flippedCards.Clear();
@@ -205,5 +212,43 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSeconds(1f);
         OnLeveFinished?.Invoke();
+    }
+
+    public void SaveGame()
+    {
+        // Save basic data (seed, grid size, moves, pairs found)
+        PlayerPrefs.SetInt("Seed", shuffleSeed);
+        PlayerPrefs.SetInt("Rows", rows);
+        PlayerPrefs.SetInt("Cols", cols);
+        PlayerPrefs.SetInt("Moves", moves);
+        PlayerPrefs.SetInt("PairsFound", pairsFound);
+
+        // Mark that a game is in progress
+        PlayerPrefs.SetInt("GameInProgress", 1);
+
+        PlayerPrefs.Save();
+        Debug.Log("Game saved via PlayerPrefs!");
+    }
+
+    public void LoadGame()
+    {
+        
+        // Retrieve basic data
+        shuffleSeed = PlayerPrefs.GetInt("Seed", 0);
+        rows = PlayerPrefs.GetInt("Rows", 4);
+        cols = PlayerPrefs.GetInt("Cols", 4);
+        moves = PlayerPrefs.GetInt("Moves", 0);
+        pairsFound = PlayerPrefs.GetInt("PairsFound", 0);
+
+        // Re-setup the game with the stored seed, rows, cols
+        SetupGame(rows, cols);
+
+        Debug.Log("Game loaded from PlayerPrefs!");
+    }
+
+    void OnApplicationFocus(bool hasFocus)
+    {
+        if(!hasFocus)
+            SaveGame();
     }
 }

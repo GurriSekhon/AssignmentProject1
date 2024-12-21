@@ -24,7 +24,7 @@ public class UIManager : MonoBehaviour
 
     private void OnEnable()
     {
-        GameManager.OnGameStart += UpdateMatchesCountUI;
+        GameManager.OnGameStart += InitializeUI;
         GameManager.OnTilesMatch += UpdateMatchesCountUI;
         GameManager.OnTurnFinished += UpdateTurnsCountUI;
         GameManager.OnLeveFinished += DisplayLevelClearPanel;
@@ -34,7 +34,7 @@ public class UIManager : MonoBehaviour
 
     private void OnDisable()
     {
-        GameManager.OnGameStart -= UpdateMatchesCountUI;
+        GameManager.OnGameStart -= InitializeUI;
         GameManager.OnTilesMatch -= UpdateMatchesCountUI;
         GameManager.OnTurnFinished -= UpdateTurnsCountUI;
         GameManager.OnLeveFinished -= DisplayLevelClearPanel;
@@ -50,6 +50,11 @@ public class UIManager : MonoBehaviour
     private void UpdateMatchesCountUI(int pairsFound, int totalPairs)
     {
         matchCountText.text = pairsFound.ToString() + "/" + totalPairs;
+    }
+    private void InitializeUI(int pairsFound, int totalPairs, int moves)
+    {
+        matchCountText.text = pairsFound.ToString() + "/" + totalPairs;
+        turnsCounterText.text = moves.ToString();
     }
 
     private void UpdateScoreUI(int newScore)
