@@ -13,12 +13,17 @@ public class GameManager : MonoBehaviour
     public static Action OnLeveFinished = null; //this is to invoke when pairs found becomes equal to the required number of pairs
     public static Action OnCardFlip = null; //event gets invoked at each tile flip
     public static GameManager Instance;
-    public GridLayoutGroup cardGrid;
+
+    public RectTransform cardContainer; // The container we attached ManualLayoutManager to
+    private ManualLayoutManager layoutManager; // reference to the script
     public GameObject cardPrefab;
 
     [Tooltip("Ensure that grid size is not an odd number")]
-    [SerializeField] private int gridsize = 4;
+    [SerializeField] private int rows = 4;
+    [SerializeField] private int cols = 4;
+
     [SerializeField] private float initialCardsHideDelay = 1.5f;
+
     private int moves = 0;
     private int pairsFound = 0;
     private int totalPairs;
@@ -30,18 +35,20 @@ public class GameManager : MonoBehaviour
             Instance = this;
         else
             Destroy(this);
+        layoutManager = cardContainer.GetComponent<ManualLayoutManager>();
+
     }
 
     void Start()
     {
-        SetupGame(gridsize, gridsize);
+        SetupGame(rows, cols);
     }
 
     public void SetupGame(int rows, int cols)
     {
-        if (gridsize % 2 != 0)
+        if ((rows * cols) % 2 != 0)
         {
-            Debug.LogWarning("Grid size is not even. Please ensure you are not putting an odd number in grid size in Gamemanager", gameObject);
+            Debug.LogWarning("Grid size must be even for pairs to match!", gameObject);
             return;
         }
 
@@ -56,7 +63,7 @@ public class GameManager : MonoBehaviour
         List<Sprite> shuffledCards = ShuffleCards(cardFaces, rows * cols);
 
         // Clean up existing cards
-        foreach (Transform child in cardGrid.transform)
+        foreach (Transform child in cardContainer.transform)
             Destroy(child.gameObject);
 
         List<CardController> cardControllers = new List<CardController>();
@@ -64,14 +71,24 @@ public class GameManager : MonoBehaviour
         // Create new cards
         for (int i = 0; i < rows * cols; i++)
         {
-            GameObject card = Instantiate(cardPrefab, cardGrid.transform);
-            CardController cardController = card.GetComponent<CardController>();
-            cardController.SetCardFace(shuffledCards[i]);
-            cardControllers.Add(cardController);
+            GameObject card = Instantiate(cardPrefab);
+            CardController controller = card.GetComponent<CardController>();
+            controller.SetCardFace(shuffledCards[i]);
+            cardControllers.Add(controller);
         }
+
+        // Convert to List<GameObject> for the layout script
+        List<GameObject> cardObjects = new List<GameObject>();
+        foreach (var ctrl in cardControllers)
+            cardObjects.Add(ctrl.gameObject);
+
+        // Now call the manual layout arrangement
+        layoutManager.ArrangeCards(rows, cols, cardObjects);
 
         StartCoroutine(RevealAndHideCards(cardControllers));
     }
+
+   
 
     private IEnumerator RevealAndHideCards(List<CardController> cardControllers)
     {
@@ -83,8 +100,8 @@ public class GameManager : MonoBehaviour
             card.RevealAllCardsToPlayer();
         }
 
-        // Allow players to memorize cards for x number of seconds
-        yield return new WaitForSeconds(initialCardsHideDelay); 
+        // Allow players to memorize cards for reveal duration
+        yield return new WaitForSeconds(initialCardsHideDelay);
 
         // Hide the cards again
         foreach (var card in cardControllers)
