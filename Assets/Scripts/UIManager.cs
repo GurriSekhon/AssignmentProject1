@@ -9,9 +9,9 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance;
     [SerializeField] private TextMeshProUGUI turnsCounterText;
     [SerializeField] private TextMeshProUGUI matchCountText;
+    [SerializeField] private TextMeshProUGUI scoreText;
     [SerializeField] private GameObject levelClearPanel;
     [SerializeField] private Button nextLevelButton;
-
     void Awake()
     {
         if (Instance == null)
@@ -28,6 +28,7 @@ public class UIManager : MonoBehaviour
         GameManager.OnTilesMatch += UpdateMatchesCountUI;
         GameManager.OnTurnFinished += UpdateTurnsCountUI;
         GameManager.OnLeveFinished += DisplayLevelClearPanel;
+        ScoreManager.OnScoreChanged += UpdateScoreUI;
     }
 
     private void OnDisable()
@@ -36,6 +37,7 @@ public class UIManager : MonoBehaviour
         GameManager.OnTilesMatch -= UpdateMatchesCountUI;
         GameManager.OnTurnFinished -= UpdateTurnsCountUI;
         GameManager.OnLeveFinished -= DisplayLevelClearPanel;
+        ScoreManager.OnScoreChanged -= UpdateScoreUI;
     }
 
 
@@ -47,6 +49,11 @@ public class UIManager : MonoBehaviour
     private void UpdateMatchesCountUI(int pairsFound, int totalPairs)
     {
         matchCountText.text = pairsFound.ToString() + "/" + totalPairs;
+    }
+    
+    private void UpdateScoreUI(int newScore)
+    {
+        scoreText.text = newScore.ToString();
     }
 
     private void DisplayLevelClearPanel()
