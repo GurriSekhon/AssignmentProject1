@@ -10,6 +10,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI turnsCounterText;
     [SerializeField] private TextMeshProUGUI matchCountText;
     [SerializeField] private TextMeshProUGUI scoreText;
+    [SerializeField] private TextMeshProUGUI comboText; //Text gameobject to be displayed for combo
     [SerializeField] private GameObject levelClearPanel;
     [SerializeField] private Button nextLevelButton;
     void Awake()
@@ -21,7 +22,6 @@ public class UIManager : MonoBehaviour
         nextLevelButton.onClick.AddListener(ReloadScene);
     }
 
-
     private void OnEnable()
     {
         GameManager.OnGameStart += UpdateMatchesCountUI;
@@ -29,6 +29,7 @@ public class UIManager : MonoBehaviour
         GameManager.OnTurnFinished += UpdateTurnsCountUI;
         GameManager.OnLeveFinished += DisplayLevelClearPanel;
         ScoreManager.OnScoreChanged += UpdateScoreUI;
+        ScoreManager.OnComboHit += ShowComboCount;
     }
 
     private void OnDisable()
@@ -38,8 +39,8 @@ public class UIManager : MonoBehaviour
         GameManager.OnTurnFinished -= UpdateTurnsCountUI;
         GameManager.OnLeveFinished -= DisplayLevelClearPanel;
         ScoreManager.OnScoreChanged -= UpdateScoreUI;
+        ScoreManager.OnComboHit -= ShowComboCount;
     }
-
 
     private void UpdateTurnsCountUI(int turnsCount)
     {
@@ -50,7 +51,7 @@ public class UIManager : MonoBehaviour
     {
         matchCountText.text = pairsFound.ToString() + "/" + totalPairs;
     }
-    
+
     private void UpdateScoreUI(int newScore)
     {
         scoreText.text = newScore.ToString();
@@ -59,6 +60,35 @@ public class UIManager : MonoBehaviour
     private void DisplayLevelClearPanel()
     {
         levelClearPanel.SetActive(true);
+    }
+
+    private void ShowComboCount(int comboCount)
+    {
+        comboText.StopAllCoroutines();
+        StartCoroutine(ShowComboText(comboCount));
+    }
+
+    private IEnumerator ShowComboText(int count)
+    {
+        comboText.gameObject.SetActive(true);
+        comboText.text = "Combo X" + count;
+        Color initialColor = comboText.color;
+        initialColor.a = 1;
+        comboText.color = initialColor;
+        yield return new WaitForSeconds(0.075f);
+        comboText.transform.localRotation = Quaternion.Euler(0, 0, -7);
+        yield return new WaitForSeconds(0.075f);
+        comboText.transform.localRotation = Quaternion.Euler(0, 0, 7);
+        yield return new WaitForSeconds(0.075f);
+        comboText.transform.localRotation = Quaternion.identity;
+        yield return new WaitForSeconds(0.25f);
+        while (comboText.color.a > 0)
+        {
+            yield return null;
+            initialColor.a = comboText.color.a - 0.01f;
+            comboText.color = initialColor;
+        }
+        comboText.gameObject.SetActive(false);
     }
 
     private void ReloadScene()

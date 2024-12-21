@@ -1,5 +1,7 @@
 using UnityEngine;
 using System;
+using TMPro;
+using System.Collections;
 
 public class ScoreManager : MonoBehaviour
 {
@@ -7,6 +9,9 @@ public class ScoreManager : MonoBehaviour
 
     // Event gets invoked whenever the score changes.
     public static event Action<int> OnScoreChanged;
+
+    //To invoke when player hits a combo
+    public static event Action<int> OnComboHit;
 
     [Header("Scoring Rules")]
     [Tooltip("Points awarded for each matched pair.")]
@@ -67,7 +72,9 @@ public class ScoreManager : MonoBehaviour
         int pointsForThisMatch = matchPoints + comboBonus * (comboCount - 1);
 
         if (comboCount >= 2)
-            Debug.Log("Combo: " + comboCount);
+        {
+            OnComboHit?.Invoke(comboCount);
+        }
         currentScore += pointsForThisMatch;
         OnScoreChanged?.Invoke(currentScore);
     }
