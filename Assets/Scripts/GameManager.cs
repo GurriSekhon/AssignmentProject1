@@ -21,6 +21,8 @@ public class GameManager : MonoBehaviour
     public GameObject cardPrefab;
     [Tooltip("Seed for shuffling. If 0, a random seed will be generated.")]
     [SerializeField] private int shuffleSeed = 0;
+    [Tooltip("When checked data won't persist between different sessions or scene reloads")]
+    [SerializeField] private bool disableDataPersistence = false;
 
     [Tooltip("Ensure that grid size is not an odd number")]
     [SerializeField] private int rows = 4;
@@ -40,6 +42,8 @@ public class GameManager : MonoBehaviour
         else
             Destroy(this);
         layoutManager = cardContainer.GetComponent<ManualLayoutManager>();
+        if (disableDataPersistence)
+            PlayerPrefs.DeleteAll();
     }
 
     private void OnEnable()
