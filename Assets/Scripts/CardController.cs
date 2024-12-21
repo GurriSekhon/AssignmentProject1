@@ -162,4 +162,15 @@ public class CardController : MonoBehaviour
         transform.rotation = Quaternion.identity;
         isAnimating = false;
     }
+
+    //When game starts all cards gets revealed to player for some time
+    public void RevealAllCardsToPlayer()
+    {
+        Debug.Log("FOrce flipping cards");
+        cardFrontImage.enabled = true;
+        cardBackImage.enabled = false;
+        isFlipped = true;
+        isAnimating = false;
+    }
+
 }

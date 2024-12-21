@@ -1213,6 +1213,7 @@ MonoBehaviour:
   cardGrid: {fileID: 99039313}
   cardPrefab: {fileID: 7106261302269977812, guid: 82875500a6b891245be0d930b4c379be, type: 3}
   gridsize: 4
+  initialCardsHideDelay: 1.5
 --- !u!4 &1642744463
 Transform:
   m_ObjectHideFlags: 0

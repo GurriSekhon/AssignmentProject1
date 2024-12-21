@@ -18,6 +18,7 @@ public class GameManager : MonoBehaviour
 
     [Tooltip("Ensure that grid size is not an odd number")]
     [SerializeField] private int gridsize = 4;
+    [SerializeField] private float initialCardsHideDelay = 1.5f;
     private int moves = 0;
     private int pairsFound = 0;
     private int totalPairs;
@@ -43,6 +44,7 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("Grid size is not even. Please ensure you are not putting an odd number in grid size in Gamemanager", gameObject);
             return;
         }
+
         moves = 0;
         pairsFound = 0;
         OnTurnFinished?.Invoke(moves);
@@ -57,12 +59,37 @@ public class GameManager : MonoBehaviour
         foreach (Transform child in cardGrid.transform)
             Destroy(child.gameObject);
 
+        List<CardController> cardControllers = new List<CardController>();
+
         // Create new cards
         for (int i = 0; i < rows * cols; i++)
         {
             GameObject card = Instantiate(cardPrefab, cardGrid.transform);
             CardController cardController = card.GetComponent<CardController>();
             cardController.SetCardFace(shuffledCards[i]);
+            cardControllers.Add(cardController);
+        }
+
+        StartCoroutine(RevealAndHideCards(cardControllers));
+    }
+
+    private IEnumerator RevealAndHideCards(List<CardController> cardControllers)
+    {
+        yield return null;
+
+        //When game starts all cards gets revealed temporarily to the player without any animations
+        foreach (var card in cardControllers)
+        {
+            card.RevealAllCardsToPlayer();
+        }
+
+        // Allow players to memorize cards for x number of seconds
+        yield return new WaitForSeconds(initialCardsHideDelay); 
+
+        // Hide the cards again
+        foreach (var card in cardControllers)
+        {
+            card.FlipBack(); 
         }
     }
 
@@ -78,7 +105,7 @@ public class GameManager : MonoBehaviour
 
             if (flippedCards[0].cardFace == flippedCards[1].cardFace)
             {
-                Debug.Log("found a matching card pairs");
+                //Debug.Log("found a matching card pairs");
                 pairsFound++;
                 OnTilesMatch?.Invoke(pairsFound, totalPairs);
                 if (pairsFound == totalPairs)
