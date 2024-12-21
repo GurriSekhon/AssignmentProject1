@@ -41,6 +41,7 @@ public class ScoreManager : MonoBehaviour
         // Subscribe to relevant game events
         GameManager.OnTilesMatch += HandleTilesMatch;
         GameManager.OnTilesMisMatch += HandleTilesMismatch;
+        GameManager.OnDataSaveCalled += SaveData;
     }
 
     private void OnDisable()
@@ -48,8 +49,13 @@ public class ScoreManager : MonoBehaviour
         // Unsubscribe from events
         GameManager.OnTilesMatch -= HandleTilesMatch;
         GameManager.OnTilesMisMatch -= HandleTilesMismatch;
+        GameManager.OnDataSaveCalled -= SaveData;
     }
 
+    private void Start()
+    {
+        LoadData();
+    }
     // Reset score and combo count when starting a new level.
     public void ResetScore()
     {
@@ -88,5 +94,20 @@ public class ScoreManager : MonoBehaviour
     public int GetCurrentScore()
     {
         return currentScore;
+    }
+
+    void SaveData()
+    {
+        PlayerPrefs.SetInt("Score", currentScore);
+        PlayerPrefs.SetInt("ComboCount", comboCount);
+        PlayerPrefs.Save();
+        Debug.Log("Player score saved");
+    }
+    void LoadData()
+    {
+        currentScore = PlayerPrefs.GetInt("Score", 0);
+        comboCount = PlayerPrefs.GetInt("ComboCount", 0);
+        Debug.Log("Player score loaded: "+currentScore);
+        OnScoreChanged?.Invoke(currentScore);
     }
 }

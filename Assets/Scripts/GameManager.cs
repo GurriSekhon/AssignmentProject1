@@ -13,6 +13,7 @@ public class GameManager : MonoBehaviour
     public static Action<float> OnTilesMisMatch = null; //event is invoked in case two tiles doesn't match
     public static Action OnLeveFinished = null; //this is to invoke when pairs found becomes equal to the required number of pairs
     public static Action OnCardFlip = null; //event gets invoked at each tile flip
+    public static Action OnDataSaveCalled = null; //event gets invoked when call for data saving is made
     public static GameManager Instance;
 
     public RectTransform cardContainer; // The container we attached ManualLayoutManager to
@@ -248,7 +249,10 @@ public class GameManager : MonoBehaviour
 
     void OnApplicationFocus(bool hasFocus)
     {
-        if(!hasFocus)
+        if (!hasFocus)
+        {
+            OnDataSaveCalled?.Invoke();
             SaveGame();
+        }
     }
 }
