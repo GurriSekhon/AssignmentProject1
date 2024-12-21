@@ -73,7 +73,8 @@ public class CardController : MonoBehaviour
 
     public void FlipBack()
     {
-        StartCoroutine(FlipBackCoroutine());
+        if (gameObject.activeSelf)
+            StartCoroutine(FlipBackCoroutine());
     }
 
     private IEnumerator FlipBackCoroutine()

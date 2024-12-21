@@ -35,6 +35,10 @@ public class GameManager : MonoBehaviour
     private int totalPairs;
     private List<CardController> flippedCards = new List<CardController>();
 
+    // Keep track of card references and matched states
+    private List<CardController> cardControllers = new List<CardController>();
+    private List<int> matchedIndices = new List<int>(); // List of indices of matched cards
+
     void Awake()
     {
         if (Instance == null)
@@ -107,7 +111,7 @@ public class GameManager : MonoBehaviour
         foreach (Transform child in cardContainer.transform)
             Destroy(child.gameObject);
 
-        List<CardController> cardControllers = new List<CardController>();
+        cardControllers.Clear(); // reset our list of cards
 
         // Create new cards
         for (int i = 0; i < rows * cols; i++)
@@ -127,9 +131,18 @@ public class GameManager : MonoBehaviour
         layoutManager.ArrangeCards(rows, cols, cardObjects);
 
         StartCoroutine(RevealAndHideCards(cardControllers));
+
+        // If we just loaded from PlayerPrefs, remove matched cards
+        if (PlayerPrefs.HasKey("MatchedIndices"))
+        {
+            string matchedStr = PlayerPrefs.GetString("MatchedIndices", "");
+            if (!string.IsNullOrEmpty(matchedStr))
+            {
+                matchedIndices = ParseMatchedIndices(matchedStr);
+                RemoveMatchedCardsFromView();
+            }
+        }
     }
-
-
 
     private IEnumerator RevealAndHideCards(List<CardController> cardControllers)
     {
@@ -161,15 +174,26 @@ public class GameManager : MonoBehaviour
             moves++;
             OnTurnFinished?.Invoke(moves);
 
+            // Find these cards' indices in cardControllers
+            int indexA = cardControllers.IndexOf(flippedCards[0]);
+            int indexB = cardControllers.IndexOf(flippedCards[1]);
+
             if (flippedCards[0].cardFace == flippedCards[1].cardFace)
             {
-                //Debug.Log("found a matching card pairs");
                 pairsFound++;
                 OnTilesMatch?.Invoke(pairsFound, totalPairs);
+
+                // Record matched indices for future reload
+                matchedIndices.Add(indexA);
+                matchedIndices.Add(indexB);
+
                 if (pairsFound == totalPairs)
                     StartCoroutine(AnnounceLevelWin());
+
                 foreach (var flippedcard in flippedCards)
+                {
                     flippedcard.Disappear();
+                }
             }
             else
             {
@@ -178,7 +202,6 @@ public class GameManager : MonoBehaviour
                     flippedcard.FlipBack();
                     flippedcard.PlayMismatchAnimation();
                 }
-
                 OnTilesMisMatch?.Invoke(0.5f);
             }
             flippedCards.Clear();
@@ -215,7 +238,6 @@ public class GameManager : MonoBehaviour
         return selectedSprites;
     }
 
-
     private List<Sprite> ShuffleCards(List<Sprite> cardFaces, int totalCards)
     {
         List<Sprite> shuffled = new List<Sprite>(cardFaces);
@@ -241,8 +263,6 @@ public class GameManager : MonoBehaviour
         PlayerPrefs.DeleteAll();
     }
 
-
-
     private IEnumerator AnnounceLevelWin()
     {
         yield return new WaitForSeconds(1f);
@@ -261,13 +281,16 @@ public class GameManager : MonoBehaviour
         // Mark that a game is in progress
         PlayerPrefs.SetInt("GameInProgress", 1);
 
+        // Save matched card indices in a comma-separated string
+        string matchedString = string.Join(",", matchedIndices);
+        PlayerPrefs.SetString("MatchedIndices", matchedString);
+
         PlayerPrefs.Save();
-        Debug.Log("Game saved via PlayerPrefs!");
+        Debug.Log("Game saved via PlayerPrefs! MatchedIndices = " + matchedString);
     }
 
     public void LoadGame()
     {
-
         // Retrieve basic data
         shuffleSeed = PlayerPrefs.GetInt("Seed", 0);
         rows = PlayerPrefs.GetInt("Rows", 4);
@@ -288,5 +311,36 @@ public class GameManager : MonoBehaviour
             OnDataSaveCalled?.Invoke();
             SaveGame();
         }
+    }
+
+    // Methods to parse and remove matched cards
+    private List<int> ParseMatchedIndices(string matchedString)
+    {
+        List<int> result = new List<int>();
+        if (string.IsNullOrEmpty(matchedString)) return result;
+
+        string[] parts = matchedString.Split(',');
+        foreach (var part in parts)
+        {
+            if (int.TryParse(part, out int idx))
+            {
+                result.Add(idx);
+            }
+        }
+        return result;
+    }
+
+    private void RemoveMatchedCardsFromView()
+    {
+        // For each matched index, call Disappear() if the card is still present
+        foreach (int idx in matchedIndices)
+        {
+            if (idx >= 0 && idx < cardControllers.Count)
+            {
+                // The card at that index should be removed
+                cardControllers[idx].Disappear();
+            }
+        }
+        Debug.Log("Removed matched cards from the layout based on saved data.");
     }
 }
