@@ -18,6 +18,8 @@ public class GameManager : MonoBehaviour
     public RectTransform cardContainer; // The container we attached ManualLayoutManager to
     private ManualLayoutManager layoutManager; // reference to the script
     public GameObject cardPrefab;
+    [Tooltip("Seed for shuffling. If 0, a random seed will be generated.")]
+    [SerializeField] private int shuffleSeed = 0;
 
     [Tooltip("Ensure that grid size is not an odd number")]
     [SerializeField] private int rows = 4;
@@ -52,6 +54,16 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("Grid size must be even for pairs to match!", gameObject);
             return;
         }
+
+        //If no seed is specified, pick a random one
+        if (shuffleSeed == 0)
+        {
+            shuffleSeed = UnityEngine.Random.Range(1, 999999);
+            Debug.Log($"No seed specified; using random seed: {shuffleSeed}");
+        }
+
+        // Set the random state for a deterministic shuffle
+        UnityEngine.Random.InitState(shuffleSeed);
 
         moves = 0;
         pairsFound = 0;
